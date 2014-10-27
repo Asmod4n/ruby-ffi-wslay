@@ -34,6 +34,24 @@ module Wslay
               :on_frame_recv_chunk_callback,  :pointer,
               :on_frame_recv_end_callback,    :pointer,
               :on_msg_recv_callback,          :pointer
+
+      def recv_callback=(&block)
+        self[:recv_callback] = FFI::Function(:ssize_t, [:pointer, :buffer_inout, :size_t, :int, :pointer], blocking: true) do |ctx, buf, len, flags, user_data|
+          block.call(buf, len, flags)
+        end
+      end
+
+      def send_callback=(&block)
+        self[:send_callback] = FFI::Function(:ssize_t, [:pointer, :buffer_inout, :size_t, :int, :pointer], blocking: true) do |ctx, data, len, flags, user_data|
+          block.call(data, len, flags)
+        end
+      end
+
+      def on_msg_recv_callback=(&block)
+        self[:on_msg_recv_callback] = FFI::Function.new(:void, [:pointer, OnMsgRecvArg.ptr, :pointer], blocking: true) do |ctx, arg, user_data|
+          block.call(arg)
+        end
+      end
     end
 
     class Msg < FFI::Struct
