@@ -42,10 +42,6 @@ module Wslay
               :msg_length,  :size_t
     end
 
-    attach_function :context_server_init, :wslay_event_context_server_init, [:pointer, Callbacks.ptr, :pointer],  Error
-    attach_function :context_client_init, :wslay_event_context_client_init, [:pointer, Callbacks.ptr, :pointer],  Error
-    attach_function :context_free,        :wslay_event_context_free,        [:pointer],                           :void
-
     attach_function :read,  :wslay_event_recv,  [:pointer], Error
     attach_function :write, :wslay_event_send,  [:pointer], Error
 

@@ -23,3 +23,5 @@ end
 
 require_relative 'wslay/enums'
 require_relative 'wslay/event'
+require_relative 'wslay/event/context'
+require_relative 'wslay/event/config'
