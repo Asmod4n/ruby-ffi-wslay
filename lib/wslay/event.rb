@@ -8,16 +8,16 @@ module Wslay
 
     class OnMsgRecvArg < FFI::Struct
       layout  :rsv,         :uint8,
-              :opcode,      OpCode,
+              :opcode,      :uint8,
               :msg,         :pointer,
               :msg_length,  :size_t,
-              :status_code, StatusCode
+              :status_code, :uint16
     end
 
     class OnFrameRecvStartArg < FFI::Struct
       layout  :fin,             :uint8,
               :rsv,             :uint8,
-              :opcode,          OpCode,
+              :opcode,          :uint8,
               :payload_length,  :uint64
     end
 
@@ -35,19 +35,19 @@ module Wslay
               :on_frame_recv_end_callback,    :pointer,
               :on_msg_recv_callback,          :pointer
 
-      def recv_callback=(&block)
-        self[:recv_callback] = FFI::Function(:ssize_t, [:pointer, :buffer_inout, :size_t, :int, :pointer], blocking: true) do |ctx, buf, len, flags, user_data|
+      def recv_callback(&block)
+        self[:recv_callback] = FFI::Function.new(:ssize_t, [:pointer, :pointer, :size_t, :int, :pointer], blocking: true) do |ctx, buf, len, flags, user_data|
           block.call(ctx, buf, len, flags)
         end
       end
 
-      def send_callback=(&block)
-        self[:send_callback] = FFI::Function(:ssize_t, [:pointer, :buffer_inout, :size_t, :int, :pointer], blocking: true) do |ctx, data, len, flags, user_data|
+      def send_callback(&block)
+        self[:send_callback] = FFI::Function.new(:ssize_t, [:pointer, :pointer, :size_t, :int, :pointer], blocking: true) do |ctx, data, len, flags, user_data|
           block.call(ctx, data, len, flags)
         end
       end
 
-      def on_msg_recv_callback=(&block)
+      def on_msg_recv_callback(&block)
         self[:on_msg_recv_callback] = FFI::Function.new(:void, [:pointer, OnMsgRecvArg.ptr, :pointer], blocking: true) do |ctx, arg, user_data|
           block.call(ctx, arg)
         end
@@ -55,7 +55,7 @@ module Wslay
     end
 
     class Msg < FFI::Struct
-      layout  :opcode,      OpCode,
+      layout  :opcode,      :uint8,
               :msg,         :pointer,
               :msg_length,  :size_t
     end
