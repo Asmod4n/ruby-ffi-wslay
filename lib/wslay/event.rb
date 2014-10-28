@@ -47,6 +47,12 @@ module Wslay
         end
       end
 
+      def genmask_callback(&block)
+        self[:genmask_callback] = FFI::Function.new(:int, [:pointer, :pointer, :size_t, :pointer], blocking: true) do |ctx, buf, len, user_data|
+          yield(ctx, buf, len)
+        end
+      end
+
       def on_msg_recv_callback(&block)
         self[:on_msg_recv_callback] = FFI::Function.new(:void, [:pointer, OnMsgRecvArg.ptr, :pointer], blocking: true) do |ctx, arg, user_data|
           yield(ctx, arg)
