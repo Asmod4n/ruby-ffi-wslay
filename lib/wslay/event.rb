@@ -72,7 +72,7 @@ module Wslay
     attach_function :queue_msg,   :wslay_event_queue_msg,   [:pointer, Msg.ptr],  Error, blocking: true
     attach_function :queue_close, :wslay_event_queue_close, [:pointer, StatusCode, :buffer_in, :size_t],  Error, blocking: true
 
-    attach_function :set_error, :wslay_event_set_error, [:pointer, Error],  :void, blocking: true
+    attach_function :set_error, :wslay_event_set_error, [:pointer, Error],  :void
 
     attach_function :want_read,   :wslay_event_want_read,   [:pointer], :bool, blocking: true
     attach_function :want_write,  :wslay_event_want_write,  [:pointer], :bool, blocking: true
