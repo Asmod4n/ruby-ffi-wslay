@@ -37,13 +37,13 @@ module Wslay
 
       def recv_callback(&block)
         self[:recv_callback] = FFI::Function.new(:ssize_t, [:pointer, :pointer, :size_t, :int, :pointer], blocking: true) do |ctx, buf, len, flags, user_data|
-          yield(ctx, buf, len, flags)
+          yield(ctx, buf, len, flags, user_data)
         end
       end
 
       def send_callback(&block)
         self[:send_callback] = FFI::Function.new(:ssize_t, [:pointer, :pointer, :size_t, :int, :pointer], blocking: true) do |ctx, data, len, flags, user_data|
-          yield(ctx, data, len, flags)
+          yield(ctx, data, len, flags, user_data)
         end
       end
 
@@ -55,7 +55,7 @@ module Wslay
 
       def on_msg_recv_callback(&block)
         self[:on_msg_recv_callback] = FFI::Function.new(:void, [:pointer, OnMsgRecvArg.ptr, :pointer], blocking: true) do |ctx, arg, user_data|
-          yield(ctx, arg)
+          yield(ctx, arg, user_data)
         end
       end
     end
