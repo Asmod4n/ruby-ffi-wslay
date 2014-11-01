@@ -49,7 +49,7 @@ module Wslay
 
       def genmask_callback(&block)
         self[:genmask_callback] = FFI::Function.new(:int, [:pointer, :pointer, :size_t, :pointer], blocking: true) do |ctx, buf, len, user_data|
-          yield(ctx, buf, len)
+          yield(ctx, buf, len, user_data)
         end
       end
 
