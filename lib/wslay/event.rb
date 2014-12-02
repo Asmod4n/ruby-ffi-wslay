@@ -6,14 +6,6 @@ module Wslay
     extend FFI::Library
     ffi_lib :wslay
 
-    class OnMsgRecvArg < FFI::Struct
-      layout  :rsv,         :uint8,
-              :opcode,      :uint8,
-              :msg,         :pointer,
-              :msg_length,  :size_t,
-              :status_code, :uint16
-    end
-
     class OnFrameRecvStartArg < FFI::Struct
       layout  :fin,             :uint8,
               :rsv,             :uint8,
@@ -26,6 +18,14 @@ module Wslay
               :data_length, :size_t
     end
 
+    class OnMsgRecvArg < FFI::Struct
+      layout  :rsv,         :uint8,
+              :opcode,      :uint8,
+              :msg,         :pointer,
+              :msg_length,  :size_t,
+              :status_code, :uint16
+    end
+
     class Callbacks < FFI::Struct
       layout  :recv_callback,                 :pointer,
               :send_callback,                 :pointer,
@@ -36,20 +36,38 @@ module Wslay
               :on_msg_recv_callback,          :pointer
 
       def recv_callback(&block)
-        self[:recv_callback] = FFI::Function.new(:ssize_t, [:pointer, :pointer, :size_t, :int, :pointer], blocking: true) do |ctx, buf, len, flags, user_data|
+        self[:recv_callback] = FFI::Function.new(:ssize_t, [:pointer, :buffer_in, :size_t, :int, :pointer], blocking: true) do |ctx, buf, len, flags, user_data|
           yield(ctx, buf, len, flags, user_data)
         end
       end
 
       def send_callback(&block)
-        self[:send_callback] = FFI::Function.new(:ssize_t, [:pointer, :pointer, :size_t, :int, :pointer], blocking: true) do |ctx, data, len, flags, user_data|
+        self[:send_callback] = FFI::Function.new(:ssize_t, [:pointer, :buffer_out, :size_t, :int, :pointer], blocking: true) do |ctx, data, len, flags, user_data|
           yield(ctx, data, len, flags, user_data)
         end
       end
 
       def genmask_callback(&block)
-        self[:genmask_callback] = FFI::Function.new(:int, [:pointer, :pointer, :size_t, :pointer], blocking: true) do |ctx, buf, len, user_data|
+        self[:genmask_callback] = FFI::Function.new(:int, [:pointer, :buffer_in, :size_t, :pointer], blocking: true) do |ctx, buf, len, user_data|
           yield(ctx, buf, len, user_data)
+        end
+      end
+
+      def on_frame_recv_start_callback(&block)
+        self[:on_frame_recv_start_callback] = FFI::Function.new(:void, [:pointer, OnFrameRecvStartArg.ptr, :pointer], blocking: true) do |ctx, arg, user_data|
+          yield(ctx, arg, user_data)
+        end
+      end
+
+      def on_frame_recv_chunk_callback(&block)
+        self[:on_frame_recv_chunk_callback] = FFI::Function.new(:void, [:pointer, OnFrameRecvChunkArg.ptr, :pointer], blocking: true) do |ctx, arg, user_data|
+          yield(ctx, arg, user_data)
+        end
+      end
+
+      def on_frame_recv_end_callback(&block)
+        self[:on_frame_recv_end_callback] = FFI::Function.new(:void [:pointer, :pointer], blocking: true) do |ctx, user_data|
+          yield(ctx, user_data)
         end
       end
 
